@@ -41,6 +41,8 @@ function dragula (initialContainers, options) {
   if (o.mirrorContainer === void 0) { o.mirrorContainer = doc.body; }
   if (o.scrollTriggerLeft === void 0) { o.scrollTriggerLeft = 70; }
   if (o.scrollTriggerRight === void 0) { o.scrollTriggerRight = 70; }
+  if (o.scrollTriggerTop === void 0) { o.scrollTriggerTop = 70; }
+  if (o.scrollTriggerBottom === void 0) { o.scrollTriggerBottom = 70; }
 
   var drake = emitter({
     containers: o.containers,
@@ -52,7 +54,9 @@ function dragula (initialContainers, options) {
     canMove: canMove,
     dragging: false,
     scrollTriggerLeft: o.scrollTriggerLeft,
-    scrollTriggerRight: o.scrollTriggerRight
+    scrollTriggerRight: o.scrollTriggerRight,
+    scrollTriggerTop: o.scrollTriggerTop,
+    scrollTriggerBottom: o.scrollTriggerBottom
   });
 
   if (o.removeOnSpill === true) {
@@ -497,6 +501,7 @@ function dragula (initialContainers, options) {
         var y = getCoord('pageY', e);
         var x = getCoord('pageX', e);
         drake.previousX = x;
+        drake.previousY = y;
 
         if (drake.dragging) {
             for (var i = 0; i < drake.containers.length; i++) {
@@ -517,10 +522,28 @@ function dragula (initialContainers, options) {
                     left: rect.right - o.scrollTriggerRight
                 };
 
+                var topTriggerContainer = {
+                    top: rect.top,
+                    right: rect.right,
+                    bottom: rect.top + o.scrollTriggerTop,
+                    left: rect.left
+                };
+
+                var bottomTriggerContainer = {
+                    top: rect.bottom - o.scrollTriggerTop,
+                    right: rect.right,
+                    bottom: rect.bottom,
+                    left: rect.left
+                };
+
                 if (y >= leftTriggerContainer.top && y <= leftTriggerContainer.bottom && x >= leftTriggerContainer.left && x <= leftTriggerContainer.right) {
                     scrollLeft(container, x);
                 } else if (y >= rightTriggerContainer.top && y <= rightTriggerContainer.bottom && x >= rightTriggerContainer.left && x <= rightTriggerContainer.right) {
                     scrollRight(container, x);
+                } else if (y >= topTriggerContainer.top && y <= topTriggerContainer.bottom && x >= topTriggerContainer.left && x <= topTriggerContainer.right) {
+                    scrollUp(container, y);
+                } else if (y >= bottomTriggerContainer.top && y <= bottomTriggerContainer.bottom && x >= bottomTriggerContainer.left && x <= bottomTriggerContainer.right) {
+                    scrollDown(container, y);
                 }
             }
         }
@@ -537,6 +560,20 @@ function dragula (initialContainers, options) {
         if (x === drake.previousX) {
             container.scrollLeft -= 5;
             setTimeout(scrollLeft.bind(this, container, x), 20);
+        }
+    }
+
+    function scrollUp(container, y) {
+        if (y === drake.previousY) {
+            container.scrollTop -= 5;
+            setTimeout(scrollUp.bind(this, container, y), 20);
+        }
+    }
+
+    function scrollDown(container, y) {
+        if (y === drake.previousY) {
+            container.scrollTop += 5;
+            setTimeout(scrollDown.bind(this, container, y), 20);
         }
     }
 
